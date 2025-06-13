@@ -199,12 +199,12 @@ vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower win
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
 local map = vim.api.nvim_set_keymap
-map("n", "<A-a>", [[:lua require'dap'.toggle_breakpoint()<CR>]], {})
+map("n", "<A-q>", [[:lua require'dap'.toggle_breakpoint()<CR>]], {})
 map("n", "<A-s>", [[:lua require'dap'.continue()<CR>]], {})
 map("n", "<A-d>", [[:lua require'dap'.step_over()<CR>]], {})
 map("n", "<A-f>", [[:lua require'dap'.step_into()<CR>]], {})
 map("n", "<A-g>", [[:lua require'dap'.step_out()<CR>]], {})
-map("n", "<A-g>", [[:lua require'dap'.step_out()<CR>]], {})
+map("n", "<A-z>", [[:!cargo build]], {})
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -290,7 +290,19 @@ require("lazy").setup({
 			},
 		},
 	},
-
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = true,
+	},
+	{
+		"swaits/universal-clipboard.nvim",
+		config = function()
+			require("universal-clipboard").setup({
+				verbose = false,
+			})
+		end,
+	},
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
 	-- This is often very useful to both group configuration, as well as handle
@@ -359,6 +371,25 @@ require("lazy").setup({
 	},
 	{ "mfussenegger/nvim-dap" },
 	{ "nvim-neotest/nvim-nio" },
+	{
+		"simrat39/rust-tools.nvim",
+		config = function()
+			local rt = require("rust-tools")
+			rt.setup({
+				server = {
+					on_attach = function(_, bufnr)
+						vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+						vim.keymap.set("n", "<leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+					end,
+				},
+			})
+		end,
+	},
+	{
+		"mrcjkb/rustaceanvim",
+		version = "^6",
+		lazy = false,
+	},
 	{
 		"rcarriga/nvim-dap-ui",
 		requires = {
@@ -431,7 +462,7 @@ require("lazy").setup({
 				config = function()
 					require("nvim-tree").setup()
 
-					vim.api.nvim_create_autocmd({ "VimEnter" }, {
+					vim.api.nvim_create_autocmd("VimEnter", {
 						callback = function()
 							require("nvim-tree.api").tree.open()
 						end,
